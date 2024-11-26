@@ -91,7 +91,10 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
     }
 
 
-    if (job_title === "") {
+    if (member_name === ""||gender === ""||sociality === ""||phone === ""||mobile === ""||id_type === ""||id_number === ""||
+      id_date === ""||id_location === ""||birth_place === ""||birthdate === ""||accomm_type === ""||qualification === ""||job_title === ""||
+      workplace === ""||work_type === ""||experience === ""||photo === ""||person === ""||person_relation === ""||person_mobile === ""
+    ) {
       return;
     }
     if (id) {
@@ -110,7 +113,42 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
       // navigate("/")
     }
   }
+  const handleSave = async (e) => { // Use async/await
+    e.preventDefault();
 
+    // Check if all fields are filled (improved validation - still recommend Yup/Formik)
+    if (Object.values(memberData).some(value => value === "")) {
+      alertify.error("جميع الحقول مطلوبة");
+      return;
+    }
+
+    try {
+      if (id) {
+        const response = await updateDataMemberData(id, memberData);
+        if(response.status === 200) {
+            alertify.success("تم التحديث بنجاح");
+            onClose();
+        } else {
+          alertify.error("حدث خطأ أثناء التحديث");
+        }
+
+
+      } else {
+        const response = await savedMemberData(memberData);
+
+        if (response.status === 201 || response.status === 200) {
+          alertify.success("تم الحفظ بنجاح");
+          onClose(); // Close the drawer on successful save
+
+        } else {
+           alertify.error("حدث خطأ أثناء الحفظ");
+        }
+      }
+    } catch (error) {
+      alertify.error(error.message || "حدث خطأ في الخادم");
+      console.error("Error saving/updating member data:", error);
+    }
+  };
   return (
     <Drawer
       anchor="left"
@@ -139,6 +177,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               type="text"
               placeholder='ادخل اسم العضو'
               className='form-control'
+              value="tet value"
               onChange={(e) => setmember_name(e.target.value)}
               required
               margin="normal"
@@ -155,6 +194,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
             <Select
               name="gender"
               label="الجنس"
+              value="tet value"
               onChange={(e) => setgender(e.target.value)}
               fullWidth
               placeholder="اختر الجنس"
@@ -177,6 +217,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               type="text"
               placeholder='الحالة الاجتماعية'
               className='form-control'
+              value="tet value"
               onChange={(e) => setsociality(e.target.value)}
               required
               fullWidth
@@ -196,6 +237,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="رقم الهاتف "
               type="text"
               placeholder='ادخل رقم الهاتف'
+              value="tet value"
               className='form-control'
               onChange={(e) => setphone(e.target.value)}
               required
@@ -217,6 +259,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="رقم الجوال "
               type="text"
               placeholder='ادخل رقم الجوال'
+              value="tet value"
               className='form-control'
               onChange={(e) => setmobile(e.target.value)}
               required
@@ -233,6 +276,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
           <Grid item xs={12} sm={3}>
             <Select
               name="gender"
+              value="tet value"
               label="الجنس"
               onChange={(e) => setgender(e.target.value)}
               fullWidth
@@ -255,6 +299,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="تاريخ اصدار الهوية"
               type="text"
               placeholder='تاريخ اصدار الهوية'
+              value="tet value"
               className='form-control'
               onChange={(e) => setid_date(e.target.value)}
               required
@@ -275,6 +320,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="محل اصدار الهوية"
               type="text"
               placeholder='محل اصدار الهوية'
+              value="tet value"
               className='form-control'
               onChange={(e) => setid_location(e.target.value)}
               required
@@ -295,6 +341,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="مكان الميلاد"
               type="text"
               placeholder='مكان الميلاد'
+              value="tet value"
               className='form-control'
               onChange={(e) => setbirth_place(e.target.value)}
               required
@@ -315,6 +362,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="تاريخ الميلاد"
               type="text"
               placeholder='تاريخ الميلاد'
+              value="tet value"
               className='form-control'
               onChange={(e) => setbirthdate(e.target.value)}
               required
@@ -335,6 +383,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="تاريخ الميلاد"
               type="text"
               placeholder='تاريخ الميلاد'
+              value="tet value"
               className='form-control'
               onChange={(e) => setbirthdate(e.target.value)}
               required
@@ -355,6 +404,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="نوع السكن"
               type="text"
               placeholder='نوع السكن'
+              value="tet value"
               className='form-control'
               onChange={(e) => setaccomm_type(e.target.value)}
               required
@@ -375,6 +425,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="الوظيفة/ الصفة في المجتمع"
               type="text"
               placeholder='الوظيفة/ الصفة في المجتمع  '
+              value="tet value"
               className='form-control'
               onChange={(e) => setjob_title(e.target.value)}
               required
@@ -395,6 +446,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="مكان العمل"
               type="text"
               placeholder='مكان العمل  '
+              value="tet value"
               className='form-control'
               onChange={(e) => setworkplace(e.target.value)}
               required
@@ -416,6 +468,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="جهة العمل"
               type="text"
               placeholder='جهة العمل  '
+              value="tet value"
               className='form-control'
               onChange={(e) => setwork_type(e.target.value)}
               required
@@ -436,6 +489,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="الخبرات"
               type="text"
               placeholder='الخبرات  '
+              value="tet value"
               className='form-control'
               onChange={(e) => setexperience(e.target.value)}
               required
@@ -456,6 +510,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="الخبرات"
               type="text"
               placeholder='الخبرات  '
+              value="tet value"
               className='form-control'
               onChange={(e) => setexperience(e.target.value)}
               required
@@ -476,6 +531,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="صورة العضو"
               type="text"
               placeholder='صورة العضو  '
+              value="tet value"
               className='form-control'
               onChange={(e) => setphoto(e.target.value)}
               required
@@ -496,6 +552,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="شخص يمكن الرجوع الية"
               type="text"
               placeholder='شخص يمكن الرجوع الية'
+              value="tet value"
               className='form-control'
               onChange={(e) => setperson(e.target.value)}
               required
@@ -516,6 +573,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="صلة القرابة"
               type="text"
               placeholder='صلة القرابة  '
+              value="tet value"
               className='form-control'
               onChange={(e) => setperson_relation(e.target.value)}
               required
@@ -536,6 +594,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="رقم هاتف الشخص المرجع"
               type="text"
               placeholder='رقم هاتف الشخص المرجع'
+              value="tet value"
               className='form-control'
               onChange={(e) => setperson_mobile(e.target.value)}
               required
