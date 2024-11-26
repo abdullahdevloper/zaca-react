@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const URL = "http://127.0.0.1:7080/memberData";
+const URL = "http://127.0.0.1:7080/membersData";
 
 export const listMemberData = () =>  axios.get(URL);
 

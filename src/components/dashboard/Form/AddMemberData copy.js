@@ -14,12 +14,13 @@ import Divider from "@mui/material/Divider";
 
 function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
   const [memberData, setMemberData] = useState({
-    member_name: "", gender: "", sociality: "", phone: "", mobile: "", id_type: "", id_number: "",
+    member_name: "", gender: "ذكر", sociality: "", phone: "", mobile: "", id_type: "", id_number: "",
     id_date: "", id_location: "", birth_place: "", birthdate: "", accomm_type: "", qualification: "",
     job_title: "", workplace: "", work_type: "", experience: "", photo: "", person: "",
     person_relation: "", person_mobile: "",
   });
 
+  
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -46,6 +47,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
 
     // Check if all fields are filled (improved validation - still recommend Yup/Formik)
     if (Object.values(memberData).some(value => value === "")) {
+      console.log(memberData);
       alertify.error("جميع الحقول مطلوبة");
       return;
     }
@@ -114,7 +116,6 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
              <Select
                 label="الجنس"
                 name="gender"
-                value={memberData.gender}
                 onChange={handleChange}
                 fullWidth
                 required

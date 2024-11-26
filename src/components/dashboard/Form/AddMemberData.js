@@ -14,6 +14,13 @@ import { MenuItem, Select } from "@mui/material";
 import Divider from "@mui/material/Divider";
 
 function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
+  const [memberData, setMemberData] = useState({
+    member_name: "", gender: "", sociality: "", phone: "", mobile: "", id_type: "", id_number: "",
+    id_date: "", id_location: "", birth_place: "", birthdate: "", accomm_type: "", qualification: "",
+    job_title: "", workplace: "", work_type: "", experience: "", photo: "", person: "",
+    person_relation: "", person_mobile: "",
+  });
+
 
 
   const [member_name, setmember_name] = useState('')
@@ -39,7 +46,6 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
   const [person_mobile, setperson_mobile] = useState('')
 
 
-
   const navigate = useNavigate()
   const { id } = useParams()
 
@@ -51,34 +57,19 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
       return <h4 className='title'>انشاء جديد</h4>
     }
   }
-
+  const handleChange = (e) => {
+    setMemberData({ ...memberData, [e.target.name]: e.target.value });
+  };
   useEffect(() => {
     if (id) {
       editMemberData(id).then((response) => {
-        setmember_name(response.data.member_name);
-        setgender(response.data.gender);
-        setsociality(response.data.sociality);
-        setphone(response.data.phone);
-        setmobile(response.data.mobile);
-        setid_type(response.data.id_type);
-        setid_number(response.data.id_number);
-        setid_date(response.data.id_date);
-        setid_location(response.data.id_location);
-        setbirth_place(response.data.birth_place);
-        setbirthdate(response.data.birthdate);
-        setaccomm_type(response.data.accomm_type);
-        setqualification(response.data.qualification);
-        setjob_title(response.data.job_title);
-        setworkplace(response.data.workplace);
-        setwork_type(response.data.work_type);
-        setexperience(response.data.experience);
-        setphoto(response.data.photo);
-        setperson(response.data.person);
-        setperson_relation(response.data.person_relation);
-        setperson_mobile(response.data.person_mobile);
-      })
+        setMemberData(response.data);
+      }).catch(error => {
+        console.error("Error fetching member data:", error);
+        alertify.error("حدث خطأ أثناء جلب بيانات العضو");
+      });
     }
-  }, [id])
+  }, [id]);
 
   function saveMemberData(e) {
     e.preventDefault()
@@ -91,9 +82,9 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
     }
 
 
-    if (member_name === ""||gender === ""||sociality === ""||phone === ""||mobile === ""||id_type === ""||id_number === ""||
-      id_date === ""||id_location === ""||birth_place === ""||birthdate === ""||accomm_type === ""||qualification === ""||job_title === ""||
-      workplace === ""||work_type === ""||experience === ""||photo === ""||person === ""||person_relation === ""||person_mobile === ""
+    if (member_name === "" || gender === "" || sociality === "" || phone === "" || mobile === "" || id_type === "" || id_number === "" ||
+      id_date === "" || id_location === "" || birth_place === "" || birthdate === "" || accomm_type === "" || qualification === "" || job_title === "" ||
+      workplace === "" || work_type === "" || experience === "" || photo === "" || person === "" || person_relation === "" || person_mobile === ""
     ) {
       return;
     }
@@ -118,6 +109,8 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
 
     // Check if all fields are filled (improved validation - still recommend Yup/Formik)
     if (Object.values(memberData).some(value => value === "")) {
+      console.error("Error saving/updating member data:");
+      console.log(memberData);
       alertify.error("جميع الحقول مطلوبة");
       return;
     }
@@ -125,9 +118,9 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
     try {
       if (id) {
         const response = await updateDataMemberData(id, memberData);
-        if(response.status === 200) {
-            alertify.success("تم التحديث بنجاح");
-            onClose();
+        if (response.status === 200) {
+          alertify.success("تم التحديث بنجاح");
+          onClose();
         } else {
           alertify.error("حدث خطأ أثناء التحديث");
         }
@@ -141,7 +134,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
           onClose(); // Close the drawer on successful save
 
         } else {
-           alertify.error("حدث خطأ أثناء الحفظ");
+          alertify.error("حدث خطأ أثناء الحفظ");
         }
       }
     } catch (error) {
@@ -163,8 +156,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
           padding: "16px",
         }}
         role="presentation"
-        onClick={onClose}
-        onKeyDown={onClose}    >
+      >
         <Title marginTop="60px">اضافة </Title>
 
         <Grid container spacing={2}>
@@ -177,8 +169,8 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               type="text"
               placeholder='ادخل اسم العضو'
               className='form-control'
-              value="tet value"
-              onChange={(e) => setmember_name(e.target.value)}
+
+              onChange={handleChange}
               required
               margin="normal"
               onClick={(event) => {
@@ -194,8 +186,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
             <Select
               name="gender"
               label="الجنس"
-              value="tet value"
-              onChange={(e) => setgender(e.target.value)}
+              onChange={handleChange}
               fullWidth
               placeholder="اختر الجنس"
               onClick={(event) => {
@@ -205,8 +196,8 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
                 event.stopPropagation();
               }}
             >
-              <MenuItem value="Withdraw Transaction">ذكر</MenuItem>
-              <MenuItem value="Payment Transaction">انثى</MenuItem>
+              <MenuItem value="1" type="number">ذكر</MenuItem>
+              <MenuItem value="2">انثى</MenuItem>
             </Select>
           </Grid>
           <Grid item xs={12} sm={3}>
@@ -217,8 +208,8 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               type="text"
               placeholder='الحالة الاجتماعية'
               className='form-control'
-              value="tet value"
-              onChange={(e) => setsociality(e.target.value)}
+
+              onChange={handleChange}
               required
               fullWidth
               margin="normal"
@@ -237,9 +228,9 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="رقم الهاتف "
               type="text"
               placeholder='ادخل رقم الهاتف'
-              value="tet value"
+
               className='form-control'
-              onChange={(e) => setphone(e.target.value)}
+              onChange={handleChange}
               required
               fullWidth
               margin="normal"
@@ -259,9 +250,9 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="رقم الجوال "
               type="text"
               placeholder='ادخل رقم الجوال'
-              value="tet value"
+
               className='form-control'
-              onChange={(e) => setmobile(e.target.value)}
+              onChange={handleChange}
               required
               fullWidth
               margin="normal"
@@ -275,12 +266,11 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
           </Grid>
           <Grid item xs={12} sm={3}>
             <Select
-              name="gender"
-              value="tet value"
-              label="الجنس"
-              onChange={(e) => setgender(e.target.value)}
+              name="id_type"
+              label="نوع البطاقة"
+              onChange={handleChange}
               fullWidth
-              placeholder="اختر الجنس"
+              placeholder="اختر نوع البطاقة"
               onClick={(event) => {
                 event.stopPropagation();
               }}
@@ -288,20 +278,19 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
                 event.stopPropagation();
               }}
             >
-              <MenuItem value="Withdraw Transaction">ذكر</MenuItem>
-              <MenuItem value="Payment Transaction">انثى</MenuItem>
+              <MenuItem value="1">الهوية</MenuItem>
+              <MenuItem value="2">الجواز</MenuItem>
             </Select>
           </Grid>
           <Grid item xs={12} sm={3}>
             <TextField
               variant="outlined"
-              name="id_date"
-              label="تاريخ اصدار الهوية"
+              name="id_number"
+              label="رقم البطاقة"
               type="text"
-              placeholder='تاريخ اصدار الهوية'
-              value="tet value"
+              placeholder='رقم البطاقة'
               className='form-control'
-              onChange={(e) => setid_date(e.target.value)}
+              onChange={handleChange}
               required
               fullWidth
               margin="normal"
@@ -313,6 +302,24 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
                 event.stopPropagation();
               }} />
           </Grid>
+
+          <Grid item xs={12} sm={3}>
+            <TextField
+
+              variant="outlined"
+              name="id_date"
+              label="تاريخ اصدار الهوية"
+              type="date"
+              placeholder='تاريخ اصدار الهوية'
+
+              className='form-control'
+              onChange={handleChange}
+              required
+              fullWidth
+              margin="normal"
+              InputLabelProps={{ shrink: true }} // To display label even when empty
+              />
+          </Grid>
           <Grid item xs={12} sm={3}>
             <TextField
               variant="outlined"
@@ -320,9 +327,9 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="محل اصدار الهوية"
               type="text"
               placeholder='محل اصدار الهوية'
-              value="tet value"
+
               className='form-control'
-              onChange={(e) => setid_location(e.target.value)}
+              onChange={handleChange}
               required
               fullWidth
               margin="normal"
@@ -341,9 +348,30 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="مكان الميلاد"
               type="text"
               placeholder='مكان الميلاد'
-              value="tet value"
+
               className='form-control'
-              onChange={(e) => setbirth_place(e.target.value)}
+              onChange={handleChange}
+              required
+              fullWidth
+              margin="normal"
+              onClick={(event) => {
+                event.stopPropagation();
+              }}
+              onKeyDown={(event) => {
+
+                event.stopPropagation();
+              }} />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <TextField
+              variant="outlined"
+              name="qualification"
+              label="المؤهلات"
+              type="text"
+              placeholder='المؤهلات'
+
+              className='form-control'
+              onChange={handleChange}
               required
               fullWidth
               margin="normal"
@@ -360,42 +388,16 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               variant="outlined"
               name="birthdate"
               label="تاريخ الميلاد"
-              type="text"
+              type="date"
               placeholder='تاريخ الميلاد'
-              value="tet value"
+
               className='form-control'
-              onChange={(e) => setbirthdate(e.target.value)}
+              onChange={handleChange}
               required
               fullWidth
               margin="normal"
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
-              onKeyDown={(event) => {
-
-                event.stopPropagation();
-              }} />
-          </Grid>
-          <Grid item xs={12} sm={3}>
-            <TextField
-              variant="outlined"
-              name="birthdate"
-              label="تاريخ الميلاد"
-              type="text"
-              placeholder='تاريخ الميلاد'
-              value="tet value"
-              className='form-control'
-              onChange={(e) => setbirthdate(e.target.value)}
-              required
-              fullWidth
-              margin="normal"
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
-              onKeyDown={(event) => {
-
-                event.stopPropagation();
-              }} />
+              InputLabelProps={{ shrink: true }} // To display label even when empty
+               />
           </Grid>
           <Grid item xs={12} sm={3}>
             <TextField
@@ -404,9 +406,9 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="نوع السكن"
               type="text"
               placeholder='نوع السكن'
-              value="tet value"
+
               className='form-control'
-              onChange={(e) => setaccomm_type(e.target.value)}
+              onChange={handleChange}
               required
               fullWidth
               margin="normal"
@@ -425,9 +427,9 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="الوظيفة/ الصفة في المجتمع"
               type="text"
               placeholder='الوظيفة/ الصفة في المجتمع  '
-              value="tet value"
+
               className='form-control'
-              onChange={(e) => setjob_title(e.target.value)}
+              onChange={handleChange}
               required
               fullWidth
               margin="normal"
@@ -446,9 +448,9 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="مكان العمل"
               type="text"
               placeholder='مكان العمل  '
-              value="tet value"
+
               className='form-control'
-              onChange={(e) => setworkplace(e.target.value)}
+              onChange={handleChange}
               required
               fullWidth
               margin="normal"
@@ -468,9 +470,9 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="جهة العمل"
               type="text"
               placeholder='جهة العمل  '
-              value="tet value"
+
               className='form-control'
-              onChange={(e) => setwork_type(e.target.value)}
+              onChange={handleChange}
               required
               fullWidth
               margin="normal"
@@ -489,9 +491,9 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="الخبرات"
               type="text"
               placeholder='الخبرات  '
-              value="tet value"
+
               className='form-control'
-              onChange={(e) => setexperience(e.target.value)}
+              onChange={handleChange}
               required
               fullWidth
               margin="normal"
@@ -503,27 +505,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
                 event.stopPropagation();
               }} />
           </Grid>
-          <Grid item xs={12} sm={3}>
-            <TextField
-              variant="outlined"
-              name="experience"
-              label="الخبرات"
-              type="text"
-              placeholder='الخبرات  '
-              value="tet value"
-              className='form-control'
-              onChange={(e) => setexperience(e.target.value)}
-              required
-              fullWidth
-              margin="normal"
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
-              onKeyDown={(event) => {
 
-                event.stopPropagation();
-              }} />
-          </Grid>
           <Grid item xs={12} sm={3}>
             <TextField
               variant="outlined"
@@ -531,9 +513,9 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="صورة العضو"
               type="text"
               placeholder='صورة العضو  '
-              value="tet value"
+
               className='form-control'
-              onChange={(e) => setphoto(e.target.value)}
+              onChange={handleChange}
               required
               fullWidth
               margin="normal"
@@ -552,9 +534,9 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="شخص يمكن الرجوع الية"
               type="text"
               placeholder='شخص يمكن الرجوع الية'
-              value="tet value"
+
               className='form-control'
-              onChange={(e) => setperson(e.target.value)}
+              onChange={handleChange}
               required
               fullWidth
               margin="normal"
@@ -573,9 +555,9 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="صلة القرابة"
               type="text"
               placeholder='صلة القرابة  '
-              value="tet value"
+
               className='form-control'
-              onChange={(e) => setperson_relation(e.target.value)}
+              onChange={handleChange}
               required
               fullWidth
               margin="normal"
@@ -594,9 +576,9 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="رقم هاتف الشخص المرجع"
               type="text"
               placeholder='رقم هاتف الشخص المرجع'
-              value="tet value"
+
               className='form-control'
-              onChange={(e) => setperson_mobile(e.target.value)}
+              onChange={handleChange}
               required
               fullWidth
               margin="normal"
@@ -617,7 +599,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
           <Button
             variant="contained"
             color="primary"
-            onClick={saveMemberData}
+            onClick={handleSave}
             sx={{ backgroundColor: "#2f9d58" }}>
             حفظ
           </Button>
