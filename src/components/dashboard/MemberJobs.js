@@ -66,7 +66,7 @@ function MemberJobs() {
               key={item.id}
             >
               <TableCell>{item.id}</TableCell>
-              <TableCell>{item.job_title}</TableCell>
+              <TableCell>{item.name_job}</TableCell>
               <TableCell>{item.status}</TableCell>
               <TableCell>{item.add_by}</TableCell>
               <TableCell>{item.add_date}</TableCell>

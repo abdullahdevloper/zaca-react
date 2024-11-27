@@ -86,7 +86,7 @@ function MemberJobForm({ onSaveMemberJob, open = true, onClose, actions }) {
       
         <TextField dir="rtl"
           style={{ marginTop: "60px" }}
-          name="title_job"
+          name="name_job"
           label="اسم الوضيفة "
           type="text"
           placeholder='ادخل اسم الوضيفة'

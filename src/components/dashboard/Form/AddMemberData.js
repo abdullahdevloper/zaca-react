@@ -10,44 +10,52 @@ import { useEffect } from 'react'
 import { savedMemberData, updateDataMemberData, editMemberData } from '../../service/MemberDataService'
 import Title from "../Title";
 import Grid from "@mui/material/Grid";
-import { MenuItem, Select } from "@mui/material";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { listConstants, deleteConstant } from '../../service/ConstantsService.js'
 import Divider from "@mui/material/Divider";
+import { listMemberJobs } from "../../service/MemberJobService.js";
 
 function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
+
+  // here we are get constants variables variants
+
+  const member_name = "";
+  const gender = "";
+  const sociality = "";
+  const phone = "";
+  const mobile = "";
+  const id_type = "";
+  const id_number = "";
+  const id_date = "";
+  const id_location = "";
+  const birth_place = "";
+  const birthdate = "";
+  const accomm_type = "";
+  const qualification = "";
+  const name_job = "";
+  const workplace = "";
+  const work_type = "";
+  const experience = "";
+  const photo = "";
+  const person = "";
+  const person_relation = "";
+  const person_mobile = "";
+
+
   const [memberData, setMemberData] = useState({
     member_name: "", gender: "", sociality: "", phone: "", mobile: "", id_type: "", id_number: "",
     id_date: "", id_location: "", birth_place: "", birthdate: "", accomm_type: "", qualification: "",
-    job_title: "", workplace: "", work_type: "", experience: "", photo: "", person: "",
+    name_job: "", workplace: "", work_type: "", experience: "", photo: "", person: "",
     person_relation: "", person_mobile: "",
   });
 
 
 
-  const [member_name, setmember_name] = useState('')
-  const [gender, setgender] = useState('')
-  const [sociality, setsociality] = useState('')
-  const [phone, setphone] = useState('')
-  const [mobile, setmobile] = useState('')
-  const [id_type, setid_type] = useState('')
-  const [id_number, setid_number] = useState('')
-  const [id_date, setid_date] = useState('')
-  const [id_location, setid_location] = useState('')
-  const [birth_place, setbirth_place] = useState('')
-  const [birthdate, setbirthdate] = useState('')
-  const [accomm_type, setaccomm_type] = useState('')
-  const [qualification, setqualification] = useState('')
-  const [job_title, setjob_title] = useState('')
-  const [workplace, setworkplace] = useState('')
-  const [work_type, setwork_type] = useState('')
-  const [experience, setexperience] = useState('')
-  const [photo, setphoto] = useState('')
-  const [person, setperson] = useState('')
-  const [person_relation, setperson_relation] = useState('')
-  const [person_mobile, setperson_mobile] = useState('')
-
 
   const navigate = useNavigate()
   const { id } = useParams()
+  const [constants, setConstants] = useState([])
+  const [memberJobs, setmemberJobs] = useState([])
 
 
   function pageTitle() {
@@ -60,7 +68,12 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
   const handleChange = (e) => {
     setMemberData({ ...memberData, [e.target.name]: e.target.value });
   };
+
+
   useEffect(() => {
+    getAllConstants()
+    getAllMemberJobs()
+
     if (id) {
       editMemberData(id).then((response) => {
         setMemberData(response.data);
@@ -71,19 +84,37 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
     }
   }, [id]);
 
+  function getAllMemberJobs() {
+    listMemberJobs().then((response) => {
+
+
+      if (response.status === 200) {
+        setmemberJobs(response.data);
+      }
+    }).catch(error => {
+      console.error(error);
+    })
+  }
+  function getAllConstants() {
+    listConstants().then((response) => {
+      alertify.success(" succesfull.");
+      if (response.status === 200)
+        setConstants(response.data)
+      console.log(constants);
+    }).catch(error => {
+
+      console.error(error);
+    })
+  }
+
+
   function saveMemberData(e) {
     e.preventDefault()
     alertify.success(" start save.");
 
-    const memberData = {
-      member_name, gender, sociality, phone, mobile, id_type, id_number,
-      id_date, id_location, birth_place, birthdate, accomm_type, qualification, job_title, workplace, work_type, experience,
-      photo, person, person_relation, person_mobile,
-    }
-
 
     if (member_name === "" || gender === "" || sociality === "" || phone === "" || mobile === "" || id_type === "" || id_number === "" ||
-      id_date === "" || id_location === "" || birth_place === "" || birthdate === "" || accomm_type === "" || qualification === "" || job_title === "" ||
+      id_date === "" || id_location === "" || birth_place === "" || birthdate === "" || accomm_type === "" || qualification === "" || name_job === "" ||
       workplace === "" || work_type === "" || experience === "" || photo === "" || person === "" || person_relation === "" || person_mobile === ""
     ) {
       return;
@@ -130,8 +161,13 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
         const response = await savedMemberData(memberData);
 
         if (response.status === 201 || response.status === 200) {
+          //generate pop app 
+          alertify.success(response.data);
+          console.log(response.data);
+
           alertify.success("تم الحفظ بنجاح");
-          onClose(); // Close the drawer on successful save
+
+          // onClose(); // Close the drawer on successful save
 
         } else {
           alertify.error("حدث خطأ أثناء الحفظ");
@@ -143,7 +179,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
     }
   };
   return (
-    <Drawer
+    <Drawer marginTop={60}
       anchor="left"
       open={open}
       onClose={onClose}
@@ -153,11 +189,11 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
       <div dir="rtl"
         style={{
           width: "900px",
-          padding: "16px",
+          padding: 50,
         }}
         role="presentation"
       >
-        <Title marginTop="60px">اضافة </Title>
+        <Title >اضافة </Title>
 
         <Grid container spacing={2}>
           <Grid item xs={12} sm={3}>
@@ -182,44 +218,50 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               }}
             />
           </Grid>
-          <Grid item xs={12} sm={3}>
-            <Select
-              name="gender"
-              label="الجنس"
-              onChange={handleChange}
-              fullWidth
-              placeholder="اختر الجنس"
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
-              onKeyDown={(event) => {
-                event.stopPropagation();
-              }}
-            >
-              <MenuItem value="1" type="number">ذكر</MenuItem>
-              <MenuItem value="2">انثى</MenuItem>
-            </Select>
+          <Grid item xs={12} sm={3} marginTop={2}>
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">اختر الجنس</InputLabel>
+
+              <Select
+                name="gender"
+                label="الجنس"
+                onChange={handleChange}
+                fullWidth
+                onClick={(event) => {
+                  event.stopPropagation();
+                }}
+                onKeyDown={(event) => {
+                  event.stopPropagation();
+                }}>
+
+                {constants.map((constant) => (
+                  constant.code_constants === "gender_type" &&
+                  <MenuItem value={constant.id} type="number">{constant.name_constants}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
-          <Grid item xs={12} sm={3}>
-            <TextField
-              variant="outlined"
-              name="sociality"
-              label="الحالة الاجتماعية "
-              type="text"
-              placeholder='الحالة الاجتماعية'
-              className='form-control'
-
-              onChange={handleChange}
-              required
-              fullWidth
-              margin="normal"
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
-              onKeyDown={(event) => {
-
-                event.stopPropagation();
-              }} />
+          <Grid item xs={12} sm={3} marginTop={2}>
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">الحالة الاجتماعية</InputLabel>
+              <Select
+                name="sociality"
+                label="الحالة الاجتماعية"
+                onChange={handleChange}
+                fullWidth
+                onClick={(event) => {
+                  event.stopPropagation();
+                }}
+                onKeyDown={(event) => {
+                  event.stopPropagation();
+                }}
+              >
+                {constants.map((constant) => (
+                  constant.code_constants === "sociality" &&
+                  <MenuItem value={constant.id} type="number">{constant.name_constants}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
           <Grid item xs={12} sm={3}>
             <TextField
@@ -264,23 +306,27 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
                 event.stopPropagation();
               }} />
           </Grid>
-          <Grid item xs={12} sm={3}>
-            <Select
-              name="id_type"
-              label="نوع البطاقة"
-              onChange={handleChange}
-              fullWidth
-              placeholder="اختر نوع البطاقة"
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
-              onKeyDown={(event) => {
-                event.stopPropagation();
-              }}
-            >
-              <MenuItem value="1">الهوية</MenuItem>
-              <MenuItem value="2">الجواز</MenuItem>
-            </Select>
+          <Grid item xs={12} sm={3} marginTop={2}>
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">نوع البطاقة</InputLabel>
+              <Select
+                name="id_type"
+                label="نوع البطاقة"
+                onChange={handleChange}
+                fullWidth
+                onClick={(event) => {
+                  event.stopPropagation();
+                }}
+                onKeyDown={(event) => {
+                  event.stopPropagation();
+                }}
+              >
+                {constants.map((constant) => (
+                  constant.code_constants === "id_type" &&
+                  <MenuItem value={constant.id} type="number">{constant.name_constants}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
           <Grid item xs={12} sm={3}>
             <TextField
@@ -318,7 +364,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               fullWidth
               margin="normal"
               InputLabelProps={{ shrink: true }} // To display label even when empty
-              />
+            />
           </Grid>
           <Grid item xs={12} sm={3}>
             <TextField
@@ -348,7 +394,6 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="مكان الميلاد"
               type="text"
               placeholder='مكان الميلاد'
-
               className='form-control'
               onChange={handleChange}
               required
@@ -362,26 +407,29 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
                 event.stopPropagation();
               }} />
           </Grid>
-          <Grid item xs={12} sm={3}>
-            <TextField
-              variant="outlined"
-              name="qualification"
-              label="المؤهلات"
-              type="text"
-              placeholder='المؤهلات'
+          <Grid item xs={12} sm={3} marginTop={2}>
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">اختر المؤهلات</InputLabel>
 
-              className='form-control'
-              onChange={handleChange}
-              required
-              fullWidth
-              margin="normal"
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
-              onKeyDown={(event) => {
-
-                event.stopPropagation();
-              }} />
+              <Select
+                name="qualification"
+                label="المؤهلات"
+                onChange={handleChange}
+                fullWidth
+                placeholder="المؤهلات"
+                onClick={(event) => {
+                  event.stopPropagation();
+                }}
+                onKeyDown={(event) => {
+                  event.stopPropagation();
+                }}
+              >
+                {constants.map((constant) => (
+                  constant.code_constants === "qualification" &&
+                  <MenuItem value={constant.id} type="number">{constant.name_constants}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
           <Grid item xs={12} sm={3}>
             <TextField
@@ -397,49 +445,50 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               fullWidth
               margin="normal"
               InputLabelProps={{ shrink: true }} // To display label even when empty
-               />
+            />
           </Grid>
-          <Grid item xs={12} sm={3}>
-            <TextField
-              variant="outlined"
-              name="accomm_type"
-              label="نوع السكن"
-              type="text"
-              placeholder='نوع السكن'
+          <Grid item xs={12} sm={3} marginTop={2}>
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">اختر نوع السكن</InputLabel>
+              <Select
+                name="accomm_type"
+                label="نوع السكن"
+                value={memberData.accomm_type} // Bind the value
+                onChange={handleChange}
+                fullWidth
+                onClick={(event) => event.stopPropagation()}
+                onKeyDown={(event) => event.stopPropagation()}
+              >
 
-              className='form-control'
-              onChange={handleChange}
-              required
-              fullWidth
-              margin="normal"
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
-              onKeyDown={(event) => {
+                {constants.map((constant) => (
+                  constant.code_constants === "accomm_type" && (
+                    <MenuItem key={constant.id} value={constant.id}>
+                      {constant.name_constants}
+                    </MenuItem>
+                  )
+                ))}
+              </Select>
+            </FormControl>
 
-                event.stopPropagation();
-              }} />
           </Grid>
-          <Grid item xs={12} sm={3}>
-            <TextField
-              variant="outlined"
-              name="job_title"
-              label="الوظيفة/ الصفة في المجتمع"
-              type="text"
-              placeholder='الوظيفة/ الصفة في المجتمع  '
-
-              className='form-control'
-              onChange={handleChange}
-              required
-              fullWidth
-              margin="normal"
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
-              onKeyDown={(event) => {
-
-                event.stopPropagation();
-              }} />
+          <Grid item xs={12} sm={3} marginTop={2}>
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">الوظيفة/ الصفة في المجتمع</InputLabel>
+              <Select
+                name="name_job"
+                label="الوظيفة/ الصفة في المجتمع"
+                onChange={handleChange}
+                fullWidth
+                onClick={(event) => event.stopPropagation()} // These are likely unnecessary
+                onKeyDown={(event) => event.stopPropagation()} //  but can be left as is
+              >
+                {memberJobs.map(memberJob => (
+                  <MenuItem key={memberJob.id} value={memberJob.id}>
+                    {memberJob.name_job}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
           <Grid item xs={12} sm={3}>
             <TextField
@@ -448,7 +497,6 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               label="مكان العمل"
               type="text"
               placeholder='مكان العمل  '
-
               className='form-control'
               onChange={handleChange}
               required
@@ -463,26 +511,25 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               }} />
           </Grid>
 
-          <Grid item xs={12} sm={3}>
-            <TextField
-              variant="outlined"
-              name="work_type"
-              label="جهة العمل"
-              type="text"
-              placeholder='جهة العمل  '
+          <Grid item xs={12} sm={3} marginTop={2} >
+            <FormControl fullWidth >
+              <InputLabel id="demo-simple-select-label">جهة العمل</InputLabel>
+              <Select
+                name="work_type"
+                label="جهة العمل"
+                onChange={handleChange}
+                fullWidth
+                onClick={(event) => event.stopPropagation()} // These are likely unnecessary
+                onKeyDown={(event) => event.stopPropagation()} //  but can be left as is
+              >
+                {constants.filter(constant => constant.code_constants === "work_type").map(constant => (
+                  <MenuItem key={constant.id} value={constant.id}>
+                    {constant.name_constants}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-              className='form-control'
-              onChange={handleChange}
-              required
-              fullWidth
-              margin="normal"
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
-              onKeyDown={(event) => {
-
-                event.stopPropagation();
-              }} />
           </Grid>
           <Grid item xs={12} sm={3}>
             <TextField
@@ -548,26 +595,26 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
                 event.stopPropagation();
               }} />
           </Grid>
-          <Grid item xs={12} sm={3}>
-            <TextField
-              variant="outlined"
-              name="person_relation"
-              label="صلة القرابة"
-              type="text"
-              placeholder='صلة القرابة  '
+          <Grid item xs={12} sm={3} marginTop={2}>
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">صلة القرابة</InputLabel>
+              <Select
+                name="person_relation"
+                label="صلة القرابة"
+                onChange={handleChange}
+                fullWidth
+                onClick={(event) => event.stopPropagation()} // These are likely unnecessary
+                onKeyDown={(event) => event.stopPropagation()} //  but can be left as is
+              >
 
-              className='form-control'
-              onChange={handleChange}
-              required
-              fullWidth
-              margin="normal"
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
-              onKeyDown={(event) => {
+                {constants.filter(constant => constant.code_constants === "person_relation").map(constant => (
+                  <MenuItem key={constant.id} value={constant.id}>
+                    {constant.name_constants}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-                event.stopPropagation();
-              }} />
           </Grid>
           <Grid item xs={12} sm={3}>
             <TextField
