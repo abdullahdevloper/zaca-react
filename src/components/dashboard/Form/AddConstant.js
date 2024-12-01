@@ -13,7 +13,7 @@ import { savedConstant, updateDataConstant, editConstant } from '../../service/C
 import Title from "../Title";
 import { withAlert } from '../withAlert'; 
 
-function ConstantForm({alert, onSaveConstant, open = true, onClose, constantId =0 }) {
+function ConstantForm({alert, open = true, onClose, constantId =0 }) {
   
 
   const [name_constants, setNameConstants] = useState('')
@@ -21,7 +21,6 @@ function ConstantForm({alert, onSaveConstant, open = true, onClose, constantId =
  
 
   useEffect(() => {
-
     if (constantId!=0) {
       editConstant(constantId).then((response) => {
         setNameConstants(response.data.name_constants);
@@ -40,21 +39,20 @@ function ConstantForm({alert, onSaveConstant, open = true, onClose, constantId =
     if (name_constants === "" || code_constants === "") {
       return;
     }
-    if (constantId) {
+    if (constantId!=0) {
       updateDataConstant(constantId, constant).then((response) => {
-        alert.showAlert("تمت العملية بنجاح", "success"); //Show alert on success
+        alert.showAlert("تمت العملية بنجاح", "success"); 
       }).catch(error => {
-        console.error(error);
+        alert.showAlert(error.message, "error"); 
+
       })
     } else {
       savedConstant(constant).then((response) => {
-        alert.showAlert("تمت العملية بنجاح", "success"); //Show alert on success
+        alert.showAlert("تمت العملية بنجاح", "success"); 
 
       }).catch(error => {
-        alert.showAlert(error.message, "error"); //Show alert on success
+        alert.showAlert(error.message, "error"); 
 
-
-        console.error(error);
       })
     }
   }

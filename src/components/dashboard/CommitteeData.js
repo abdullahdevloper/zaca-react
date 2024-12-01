@@ -13,39 +13,70 @@ import Grid from "@mui/material/Grid";
 import Divider from "@mui/material/Divider";
 import AddMemberData from "./Form/AddMemberData.js";
 import AddCommitteeData from "./Form/AddCommitteeData.js";
+import { withAlert } from './withAlert'; 
 
 
 
-function CommitteeData() {
+function CommitteeData({ alert }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [committeeId, setCommitteeId] = useState(null);  // State to store committee ID for editing
+  const [committeeData, setCommitteeData] = useState([]);
 
-
-  function dateFormatter(dateArray) {
-    const year = dateArray[0];
-    const month = dateArray[1];
-    const day = dateArray[2];
-
-    return year + " : " + month + " : " + day;
-  }
-
-  const [committeeData, setCommitteeData] = useState([])
 
   useEffect(() => {
-    getAllCommitteeData()
-  }, [])
+    getAllCommitteeData();
+  }, []);
 
-  function getAllCommitteeData() {
-    listCommitteeData().then((response) => {
-
-
+  async function getAllCommitteeData() {
+    try {
+      const response = await listCommitteeData();
       if (response.status === 200) {
+        console.log(response.data);
         setCommitteeData(response.data);
+      }else if (response.status === 204) {
+        alert.showAlert("لا يوجد بيانات", "success"); // Use alert
+      }  else {
+        alert.showAlert("Failed to fetch committee data", "error"); // Use alert
       }
-    }).catch(error => {
-
+    } catch (error) {
+      alert.showAlert("An error occurred while fetching committee data", "error"); // Use alert
       console.error(error);
-    })
+    }
   }
+
+
+  const handleEditCommittee = (id) => {
+    setCommitteeId(id);
+    setIsFormOpen(true); // Open the form for editing
+  };
+
+
+  const handleUpdateCommittee = async () => {
+    await getAllCommitteeData(); // Refresh the list after successful update.  Consider adding more specific feedback/alert for success
+  }
+
+
+
+  const handleDeleteCommittee = async (id) => {  // Implement delete functionality
+    try {
+      await deleteCommitteeData(id);
+      alert.showAlert("Committee data deleted successfully!", "success"); // Use alert
+      getAllCommitteeData();
+    } catch (error) {
+      alert.showAlert("Error deleting committee data!", "error"); // Use alert
+      console.error("Error deleting committee data:", error);
+    }
+  };
+
+
+  const handleCloseForm = () => {
+    setCommitteeId(0);
+    setIsFormOpen(false); // Open the form when edit is clicked
+  };
+  const handleNewcommitteeData = () => {
+    setCommitteeId(0);
+    setIsFormOpen(true); // Open the form when edit is clicked
+  };
   return (
     <React.Fragment>
       <Title> اللجان</Title>
@@ -66,12 +97,17 @@ function CommitteeData() {
           {committeeData.map((item) => (
             <TableRow key={item.id}>
               <TableCell>{item.id}</TableCell>
-              <TableCell>{item.committee_type_id}</TableCell>
+              <TableCell>{item.committee_type_id.name_constants}</TableCell>
               <TableCell>{item.partner_id}</TableCell>
               <TableCell>{item.list_id}</TableCell>
               <TableCell>{item.status}</TableCell>
-              <TableCell>{item.add_by}</TableCell>
+              <TableCell>{item.add_by.user_name}</TableCell>
               <TableCell>{item.add_date}</TableCell>
+              <TableCell>
+                <Button className="btn btn-success" onClick={() => handleEditCommittee(item.id)}>
+                  Edit
+                </Button>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -83,15 +119,16 @@ function CommitteeData() {
         <Button
           variant="contained"
           color="primary"
-          onClick={() => setIsFormOpen(true)}
+          onClick={() => handleNewcommitteeData()}
           sx={{ backgroundColor: "#2f9d58" }}
         >
           اضافة جديد
         </Button>
         <AddCommitteeData
+        onClose={handleCloseForm}
+        committeeId={committeeId}
           // onSaveAccount={handleSaveUser}
           open={isFormOpen}
-          onClose={() => setIsFormOpen(false)}
         />
       </Grid>
     </React.Fragment>
@@ -99,4 +136,4 @@ function CommitteeData() {
 }
 
 
-export default CommitteeData;
+export default withAlert(CommitteeData); 

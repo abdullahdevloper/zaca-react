@@ -1,68 +1,65 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Button from "@mui/material/Button";
 import Drawer from "@mui/material/Drawer";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
-import alertify from "alertifyjs";
-import { connect } from "react-redux";
-import { useNavigate, useParams } from 'react-router-dom'
-import { useEffect } from 'react'
-import { savedMemberJob, updateDataMemberJob, editMemberJob } from '../../service/MemberJobService'
+import { useParams } from 'react-router-dom';
+import { savedMemberJob, updateDataMemberJob, editMemberJob } from '../../service/MemberJobService';
 import Title from "../Title";
+import { withAlert } from '../withAlert';
 
-function MemberJobForm({ onSaveMemberJob, open = true, onClose, actions }) {
-  
+function MemberJobForm({ alert, onSaveMemberJob, open = true, onClose, memberJobId = 0 }) {
+  const [job_title, setJobTitle] = useState('');
 
-  const [job_title, setjob_title] = useState('') 
-
-
-  const navigate = useNavigate()
-  const { id } = useParams()
-
-
-  function pageTitle() {
-    if (id) {
-      return <h4 className='title'>تعديل</h4>
-    } else {
-      return <h4 className='title'>انشاء جديد</h4>
-    }
-  }
 
   useEffect(() => {
-    if (id) {
-      editMemberJob(id).then((response) => {
-        setjob_title(response.data.job_title);
-        
-      })
+    if (memberJobId !== 0) {
+      editMemberJob(memberJobId)
+        .then((response) => {
+          if (response.status === 200) {
+            setJobTitle(response.data.name_job); // Assuming name_job is the field from API
+          } else {
+            alert.showAlert("Failed to fetch member job details", "error");
+          }
+        })
+        .catch(error => {
+          alert.showAlert("An error occurred while fetching member job details", "error");
+          console.error(error);
+        });
     }
-  }, [id])
+  }, [memberJobId, alert]);
 
-  function saveMemberJob(e) {
-    e.preventDefault()
-    alertify.success(" start save.");
+  const handleSave = async (e) => {
+    e.preventDefault();
 
-    const memberJob = { job_title }
+    const memberJob = { name_job: job_title }; // Use name_job for consistency
 
-
-    if (job_title === "" ) {
+    if (job_title === "") {
+      alert.showAlert("Job title is required", "error");
       return;
     }
-    if (id) {
-      updateDataMemberJob(id, memberJob).then((response) => {
-        // navigate('/')
-      }).catch(error => {
-        console.error(error);
-      })
-    } else {
-      savedMemberJob(memberJob).then((response) => {
-      }).catch(error => {
-        alertify.success(error.message);
 
-        console.error(error);
-      })
-      // navigate("/")
+    try {
+      let response;
+      if (memberJobId !== 0) {
+        response = await updateDataMemberJob(memberJobId, memberJob);
+      } else {
+        response = await savedMemberJob(memberJob);
+      }
+
+      if (response.status === 200 || response.status === 201) {
+        alert.showAlert("تمت العملية بنجاح", "success");
+        if (onSaveMemberJob) {
+          onSaveMemberJob();
+        }
+        onClose();
+      } else {
+        alert.showAlert("Failed to save member job", "error");
+      }
+    } catch (error) {
+      alert.showAlert(error.message || "حدث خطأ في الخادم", "error");
     }
-  }
+  };
 
   return (
     <Drawer
@@ -73,45 +70,33 @@ function MemberJobForm({ onSaveMemberJob, open = true, onClose, actions }) {
         disableScrollLock: true,
       }}
     >
-      <div dir="rtl"
-        style={{
-          width: "300px",
-          padding: "16px",
-        }}
-        role="presentation"
-        onClick={onClose}
-        onKeyDown={onClose}
-      >
-      <Title marginTop="60px">اضافة </Title>
-      
-        <TextField dir="rtl"
+      <div dir="rtl" style={{ width: "300px", padding: "16px" }} role="presentation">
+        <Title marginTop="60px">اضافة </Title>
+
+        <TextField
           style={{ marginTop: "60px" }}
           name="name_job"
           label="اسم الوضيفة "
           type="text"
           placeholder='ادخل اسم الوضيفة'
           className='form-control'
-          onChange={(e) => setjob_title(e.target.value)}
+          value={job_title}  // Add value prop
+          onChange={(e) => setJobTitle(e.target.value)} // Update state
           required
           fullWidth
           margin="normal"
-          onClick={(event) => {
-            event.stopPropagation();
-          }}
-          onKeyDown={(event) => {
-
-            event.stopPropagation();
-          }}
+          onClick={(event) => event.stopPropagation()}
+          onKeyDown={(event) => event.stopPropagation()}
         />
-       
 
 
         <Box mt={2}>
           <Button
             variant="contained"
             color="primary"
-            onClick={saveMemberJob}
-            sx={{ backgroundColor: "#2f9d58" }}>
+            onClick={handleSave} // Call handleSave
+            sx={{ backgroundColor: "#2f9d58" }}
+          >
             حفظ
           </Button>
         </Box>
@@ -120,4 +105,6 @@ function MemberJobForm({ onSaveMemberJob, open = true, onClose, actions }) {
   );
 }
 
-export default connect(null)(MemberJobForm);
+export default withAlert(MemberJobForm);
+
+

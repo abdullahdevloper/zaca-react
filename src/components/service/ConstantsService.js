@@ -7,9 +7,8 @@ export const listConstants = () =>  axios.get(URL);
 export const savedConstant = (constant) => axios.post(URL, constant);
 
 export const editConstant = (constantid) => {
-    return axios.get(`${URL}/${constantid}`); // Use template literal for cleaner URL construction
-    console.log(constantid);
-    // return axios.get(URL + '/' + constantid);
+    return axios.get(`${URL}/${constantid}`); 
+   
 }
 
 export const updateDataConstant = (constantid , constant) =>{

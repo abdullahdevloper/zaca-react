@@ -3,15 +3,15 @@ import Button from "@mui/material/Button";
 import Drawer from "@mui/material/Drawer";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
-import alertify from "alertifyjs";
 import axios from "axios";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { useNavigate, useParams } from 'react-router-dom'
 import { useEffect } from 'react'
 import { savedUser, updateDataUser, editUser} from '../../service/UserService'
+import { withAlert } from '../withAlert';
 
-function AccountForm({ onSaveAccount, open = true, onClose, actions }) {
+function AccountForm({ alert,onSaveAccount, open = true, onClose, userId =0 }) {
   
 
   const [user_name, setUserName] = useState('')
@@ -22,21 +22,11 @@ function AccountForm({ onSaveAccount, open = true, onClose, actions }) {
   const [add_date, setAddDate] = useState('')
 
 
-  const navigate = useNavigate()
-  const { id } = useParams()
 
-
-  function pageTitle() {
-    if (id) {
-      return <h4 className='title'>تعديل</h4>
-    } else {
-      return <h4 className='title'>انشاء جديد</h4>
-    }
-  }
 
   useEffect(() => {
-    if (id) {
-      editUser(id).then((response) => {
+    if (userId!=0) {
+      editUser(userId).then((response) => {
         setUserName(response.data.user_name);
         setFullName(response.data.full_name);
         setPassword(response.data.password);
@@ -45,31 +35,33 @@ function AccountForm({ onSaveAccount, open = true, onClose, actions }) {
         setAddDate(response.data.add_date);
       })
     }
-  }, [id])
+  }, [userId])
 
   function saveUser(e) {
     e.preventDefault()
 
     const user = { user_name, full_name, password }
 
-
     if (user_name === "" || full_name === "" || password === "") {
       return;
     }
-    if (id) {
-      updateDataUser(id, user).then((response) => {
-        // navigate('/')
+    if (userId!=0) {
+      updateDataUser(userId, user).then((response) => {
+        alert.showAlert("تمت العملية بنجاح", "success"); 
+        onClose();
+
       }).catch(error => {
-        console.error(error);
+        onClose();
+        alert.showAlert(error.message, "error"); 
       })
     } else {
       savedUser(user).then((response) => {
-      }).catch(error => {
-        alertify.success(error.message);
+        alert.showAlert("تمت العملية بنجاح", "success"); 
 
-        console.error(error);
+      }).catch(error => {
+        alert.showAlert(error.message, "error"); 
       })
-      // navigate("/")
+      onClose();
     }
   }
 
@@ -97,6 +89,7 @@ function AccountForm({ onSaveAccount, open = true, onClose, actions }) {
           name="user_name"
           label="اسم المستخدم "
           type="text"
+          value={user_name}
           placeholder='Enter FirstName'
           className='form-control'
           onChange={(e) => setUserName(e.target.value)}
@@ -115,6 +108,7 @@ function AccountForm({ onSaveAccount, open = true, onClose, actions }) {
           name="full_name"
           label="الاسم الكامل"
           fullWidth
+          value={full_name}
           onChange={(e) => setFullName(e.target.value)}
           margin="normal"
           onClick={(event) => {
@@ -128,6 +122,7 @@ function AccountForm({ onSaveAccount, open = true, onClose, actions }) {
           name="password"
           label="كلمة المرور"
           fullWidth
+          value={password}
           margin="normal"
           onChange={(e)=>setPassword(e.target.value)}
           onClick={(event) => {
@@ -152,5 +147,5 @@ function AccountForm({ onSaveAccount, open = true, onClose, actions }) {
     </Drawer>
   );
 }
+export default withAlert(AccountForm);
 
-export default connect(null)(AccountForm);

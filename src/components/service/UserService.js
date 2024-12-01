@@ -7,7 +7,8 @@ export const listUsers = () =>  axios.get(URL);
 export const savedUser = (user) => axios.post(URL, user);
 
 export const editUser = (userid) => {
-    return axios.get(URL + '/' + userid);
+    return axios.get(`${URL}/${userid}`); 
+
 }
 
 export const updateDataUser = (userid , user) =>{

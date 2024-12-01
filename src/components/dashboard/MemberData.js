@@ -4,50 +4,72 @@ import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import Title from "./Title.js";
+import Title from "./Title";
 import { useEffect, useState } from "react";
 import Button from "@mui/material/Button";
-import { listMemberData, deleteMemberData } from '../service/MemberDataService.js'
-import alertify from "alertifyjs";
+import { listMemberData, deleteMemberData, editMemberData, updateDataMemberData } from '../service/MemberDataService.js';
 import Grid from "@mui/material/Grid";
-import Divider from "@mui/material/Divider";
 import AddMemberData from "./Form/AddMemberData.js";
+import Divider from "@mui/material/Divider";
+import { withAlert } from './withAlert';
 import { FormControl } from "@mui/material";
 
-
-
-function MemberData() {
+function MemberData({ alert }) { // Inject alert prop
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [memberId, setMemberId] = useState(null);
+  const [memberData, setMemberData] = useState([]);
 
-
-  function dateFormatter(dateArray) {
-    const year = dateArray[0];
-    const month = dateArray[1];
-    const day = dateArray[2];
-
-    return year + " : " + month + " : " + day;
-  }
-
-  const [memberData, setmemberData] = useState([])
-
-  
   useEffect(() => {
-    getAllMemberData()
-  }, [])
+    getAllMemberData();
+  }, []);
 
-  function getAllMemberData() {
-    listMemberData().then((response) => {
-      console.log(response.data);
-
+  async function getAllMemberData() {
+    try {
+      const response = await listMemberData();
       if (response.status === 200) {
-        console.log(response.data);
-        setmemberData(response.data);
+        setMemberData(response.data);
+      } else if (response.status === 204) {
+        alert.showAlert("لا يوجد بيانات", "success");
+      } else {
+        alert.showAlert("Failed to fetch member data", "error");
       }
-    }).catch(error => {
-
+    } catch (error) {
+      alert.showAlert("An error occurred while fetching member data", "error");
       console.error(error);
-    })
+    }
   }
+
+  const handleEditMember = (id) => {
+    setMemberId(id);
+    setIsFormOpen(true);
+  };
+
+  const handleCloseForm = () => {
+    setMemberId(0);
+    setIsFormOpen(false);
+  };
+
+  const handleNewMember = () => {
+    setMemberId(0);
+    setIsFormOpen(true);
+  };
+
+
+  const handleUpdateMember = async () => {
+    await getAllMemberData();
+  };
+
+  const handleDeleteMember = async (id) => {
+    try {
+      await deleteMemberData(id);
+      alert.showAlert("Member data deleted successfully!", "success");
+      getAllMemberData();
+    } catch (error) {
+      alert.showAlert("Error deleting member data!", "error");
+      console.error("Error deleting member data:", error);
+    }
+  };
+
   return (
     <React.Fragment>
       <Title> الاعضاء </Title>
@@ -75,9 +97,9 @@ function MemberData() {
             <TableCell>اقرب شخص </TableCell>
             <TableCell>علاقة بالشخص </TableCell>
             <TableCell>رقم الشخص </TableCell>
-
             <TableCell>اضيف </TableCell>
             <TableCell>تاريخ الاصافة</TableCell>
+            <TableCell>Edit</TableCell>
 
           </TableRow>
         </TableHead>
@@ -108,12 +130,14 @@ function MemberData() {
               <TableCell>{item.person}</TableCell>
               <TableCell>{item.person_relation.name_constants}</TableCell>
               <TableCell>{item.person_mobile}</TableCell>
-
-
-
-
               <TableCell>{item.add_by.first_name}</TableCell>
               <TableCell>{item.add_date}</TableCell>
+              <TableCell>
+                <Button className="btn btn-success" onClick={() => handleEditMember(item.id)}>
+                  Edit
+                </Button>
+              </TableCell>
+              <TableCell></TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -121,22 +145,26 @@ function MemberData() {
 
       <Divider />
       <FormControl fullWidth>
-        <Grid item container justifyContent="flex-end" >
-          <Button
-            dir="rtl"
-            variant="contained"
-            color="primary"
-            onClick={() => setIsFormOpen(true)}
-            sx={{ backgroundColor: "#2f9d58" }}
-          >
-            اضافة جديد
-          </Button>
+     
+      <Grid item xs={12} container justifyContent="flex-end">
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => handleNewMember()}
+          sx={{ backgroundColor: "#2f9d58" }}
+        >
+          اضافة جديد
+        </Button>
+
+        {isFormOpen && (
           <AddMemberData
-            // onSaveAccount={handleSaveUser}
             open={isFormOpen}
-            onClose={() => setIsFormOpen(false)}
+            onClose={() => handleCloseForm()}
+            memberId={memberId}
+            onSaveMemberData={handleUpdateMember}
           />
-        </Grid>
+        )}
+      </Grid>
       </FormControl>
 
     </React.Fragment>

@@ -14,8 +14,9 @@ import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { listConstants, deleteConstant } from '../../service/ConstantsService.js'
 import Divider from "@mui/material/Divider";
 import { listMemberJobs } from "../../service/MemberJobService.js";
+import { withAlert } from '../withAlert'; 
 
-function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
+function MemberDataForm({alert, onSaveMemberData, open = true, onClose, actions ,memberId=0}) {
 
   // here we are get constants variables variants
 
@@ -50,133 +51,95 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
   });
 
 
-
-
-  const navigate = useNavigate()
-  const { id } = useParams()
   const [constants, setConstants] = useState([])
-  const [memberJobs, setmemberJobs] = useState([])
+  const [memberJobs, setMemberJobs] = useState([])
 
+  function getAllMemberJobs() {
+    listMemberJobs()
+      .then((response) => {
+        if (response.status === 200) {
+          setMemberJobs(response.data);
+        }
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }
 
-  function pageTitle() {
-    if (id) {
-      return <h4 className='title'>تعديل</h4>
-    } else {
-      return <h4 className='title'>انشاء جديد</h4>
+  async function getAllConstants() {
+    try {
+      const response = await listConstants();
+      if (response.status === 200) {
+        setConstants(response.data);
+      }
+    } catch (error) {
+      // Handle error here or display a more user-friendly message
     }
   }
+
+
   const handleChange = (e) => {
     setMemberData({ ...memberData, [e.target.name]: e.target.value });
   };
 
-
   useEffect(() => {
-    getAllConstants()
-    getAllMemberJobs()
+    getAllConstants();
+    getAllMemberJobs();
 
-    if (id) {
-      editMemberData(id).then((response) => {
-        setMemberData(response.data);
+    if (memberId !== 0) { 
+      editMemberData(memberId).then((response) => {
+        if (response.status === 200) {
+
+          setMemberData(response.data);
+
+        } else {
+          alert.showAlert("Failed to fetch member data", "error");
+        }
       }).catch(error => {
-        console.error("Error fetching member data:", error);
-        alertify.error("حدث خطأ أثناء جلب بيانات العضو");
+        alert.showAlert("An error occurred while fetching member data", "error");
+        console.error(error);
       });
     }
-  }, [id]);
-
-  function getAllMemberJobs() {
-    listMemberJobs().then((response) => {
+  }, [memberId, alert]);
 
 
-      if (response.status === 200) {
-        setmemberJobs(response.data);
-      }
-    }).catch(error => {
-      console.error(error);
-    })
-  }
-  function getAllConstants() {
-    listConstants().then((response) => {
-      alertify.success(" succesfull.");
-      if (response.status === 200)
-        setConstants(response.data)
-      console.log(constants);
-    }).catch(error => {
 
-      console.error(error);
-    })
-  }
-
-
-  function saveMemberData(e) {
-    e.preventDefault()
-    alertify.success(" start save.");
-
-
-    if (member_name === "" || gender === "" || sociality === "" || phone === "" || mobile === "" || id_type === "" || id_number === "" ||
-      id_date === "" || id_location === "" || birth_place === "" || birthdate === "" || accomm_type === "" || qualification === "" || name_job === "" ||
-      workplace === "" || work_type === "" || experience === "" || photo === "" || person === "" || person_relation === "" || person_mobile === ""
-    ) {
-      return;
-    }
-    if (id) {
-      updateDataMemberData(id, memberData).then((response) => {
-        // navigate('/')
-      }).catch(error => {
-        console.error(error);
-      })
-    } else {
-      savedMemberData(memberData).then((response) => {
-      }).catch(error => {
-        alertify.success(error.message);
-
-        console.error(error);
-      })
-      // navigate("/")
-    }
-  }
-  const handleSave = async (e) => { // Use async/await
+ 
+  const handleSave = async (e) => {
     e.preventDefault();
 
-    // Check if all fields are filled (improved validation - still recommend Yup/Formik)
     if (Object.values(memberData).some(value => value === "")) {
-      console.error("Error saving/updating member data:");
-      console.log(memberData);
-      alertify.error("جميع الحقول مطلوبة");
+      alert.showAlert("All fields are required", "error");
       return;
     }
 
     try {
-      if (id) {
-        const response = await updateDataMemberData(id, memberData);
-        if (response.status === 200) {
-          alertify.success("تم التحديث بنجاح");
-          onClose();
-        } else {
-          alertify.error("حدث خطأ أثناء التحديث");
-        }
+      let response;
 
+      if (memberId !== 0) {
+        response = await updateDataMemberData(memberId, memberData);
+      } else {
+        response = await savedMemberData(memberData);
+      }
+
+      if (response.status === 200 || response.status === 201) {
+        alert.showAlert("Member data saved successfully!", "success");
+
+        if (onSaveMemberData) {
+          onSaveMemberData(); // Call the callback after successful save/update
+        }
+        onClose();
 
       } else {
-        const response = await savedMemberData(memberData);
-
-        if (response.status === 201 || response.status === 200) {
-          //generate pop app 
-          alertify.success(response.data);
-          console.log(response.data);
-
-          alertify.success("تم الحفظ بنجاح");
-
-          // onClose(); // Close the drawer on successful save
-
-        } else {
-          alertify.error("حدث خطأ أثناء الحفظ");
-        }
+        alert.showAlert("Failed to save member data", "error");
       }
+
     } catch (error) {
-      alertify.error(error.message || "حدث خطأ في الخادم");
-      console.error("Error saving/updating member data:", error);
+      alert.showAlert(error.message || "حدث خطأ في الخادم", "error");
+      console.error(error);
+
     }
+
   };
   return (
     <Drawer marginTop={60}
@@ -203,9 +166,9 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
               name="member_name"
               label="اسم العضو "
               type="text"
+              value={memberData.member_name}
               placeholder='ادخل اسم العضو'
               className='form-control'
-
               onChange={handleChange}
               required
               margin="normal"
@@ -236,7 +199,7 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
 
                 {constants.map((constant) => (
                   constant.code_constants === "gender_type" &&
-                  <MenuItem value={constant.id} type="number">{constant.name_constants}</MenuItem>
+                  <MenuItem selected={true} value={constant.id} type="number">{constant.id}</MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -657,5 +620,5 @@ function MemberDataForm({ onSaveMemberData, open = true, onClose, actions }) {
 
   );
 }
+export default withAlert(MemberDataForm); 
 
-export default connect(null)(MemberDataForm);

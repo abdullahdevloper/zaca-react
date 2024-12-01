@@ -7,7 +7,8 @@ export const listCommitteeData = () =>  axios.get(URL);
 export const savedCommitteeData = (committeeData) => axios.post(URL, committeeData);
 
 export const editCommitteeData = (committeeDataid) => {
-    return axios.get(URL + '/' + committeeDataid);
+    return axios.get(`${URL}/${committeeDataid}`); 
+
 }
 
 export const updateCommitteeData = (committeeDataid , committeeData) =>{

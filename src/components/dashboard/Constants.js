@@ -12,41 +12,18 @@ import alertify from "alertifyjs";
 import Grid from "@mui/material/Grid";
 import AddConstant from "./Form/AddConstant.js";
 import Divider from "@mui/material/Divider";
-import CloseIcon from '@mui/icons-material/Close';
-import IconButton from '@mui/material/IconButton';
-import { Collapse } from "@mui/material";
-import { createPortal } from "react-dom";
 import { withAlert } from './withAlert';
 
 
 
-function preventDefault(event) {
-  event.preventDefault();
-}
 function Constants({ alert }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [currentConstant, setCurrentConstant] = useState(null);
   const [constantId, setConstantId] = useState(null);
-  const [open, setOpen] = React.useState(true);
 
-
-
-  const onCloseEditForm = () => {
-    setIsFormOpen(false);
-    setCurrentConstant(null);
-  };
-  function dateFormatter(dateArray) {
-    const year = dateArray[0];
-    const month = dateArray[1];
-    const day = dateArray[2];
-
-    return year + " : " + month + " : " + day;
-  }
 
   const [constant, setConstant] = useState([])
 
   useEffect(() => {
-
     getAllConstants()
   }, [])
 
@@ -56,29 +33,18 @@ function Constants({ alert }) {
       if (response.status === 200)
         setConstant(response.data)
     }).catch(error => {
-
-      console.error(error);
+      alertify.success(error.message,"error");
     })
   }
   const handleEditConstant = async (id) => setConstantId(id);
-  const handleUpdateConstant = async (updatedConstantData) => {
-    try {
-      const response = await updateDataConstant(updatedConstantData.id, updatedConstantData);
-      if (response.status === 200) {
-        alert.show("Constant updated successfully", "success");
-        onCloseEditForm();
-        getAllConstants();
 
-      }
-      else {
-        alertify.error("failed to update constant")
-      }
-
-    } catch (error) {
-      alertify.error("An error occurred while updating constant data.");
-      console.error(error);
-    }
-
+  const handleCloseForm = () => {
+    setConstantId(0);
+    setIsFormOpen(false); // Open the form when edit is clicked
+  };
+  const handleNewConstant = () => {
+    setConstantId(0);
+    setIsFormOpen(true); // Open the form when edit is clicked
   };
   return (
     <React.Fragment>
@@ -100,9 +66,7 @@ function Constants({ alert }) {
         <TableBody>
           {constant.map((item) => (
             <TableRow
-
-              key={item.id}
-            >
+              key={item.id}>
               <TableCell>{item.id}</TableCell>
               <TableCell>{item.name_constants}</TableCell>
               <TableCell>{item.code_constants}</TableCell>
@@ -125,17 +89,16 @@ function Constants({ alert }) {
         <Button
           variant="contained"
           color="primary"
-          onClick={() => setIsFormOpen(true)}
+          onClick={() => handleNewConstant(true)}
           sx={{ backgroundColor: "#2f9d58" }}
         >
           اضافة جديد
         </Button>
         {isFormOpen && (
           <AddConstant
-            onSaveConstant={handleUpdateConstant}
             open={isFormOpen}
-            onClose={() => setIsFormOpen(false)}
-            constantId={constantId} // Safe to pass now, but handle null in AddConstant
+            onClose={() => handleCloseForm()}
+            constantId={constantId} 
           />
         )}
       </Grid>

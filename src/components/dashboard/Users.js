@@ -1,5 +1,4 @@
 import * as React from "react";
-import Link from "@mui/material/Link";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -8,118 +7,130 @@ import TableRow from "@mui/material/TableRow";
 import Title from "./Title";
 import { useEffect, useState } from "react";
 import Button from "@mui/material/Button";
-import { listUsers, deleteUser } from '../service/UserService.js'
-import alertify from "alertifyjs";
+import { listUsers, deleteUser, editUser, updateDataUser } from '../service/UserService.js';
 import Grid from "@mui/material/Grid";
 import AddAccount from "./Form/AddAccount.js";
 import Divider from "@mui/material/Divider";
-import { withAlert } from './withAlert'; 
-function preventDefault(event) {
-  event.preventDefault();
-}
+import { withAlert } from './withAlert';
 
-function Accounts({ alert }) {
+function Users({ alert }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [userId, setUserId] = useState(null);  // State to store the ID of the user being edited
+  const [users, setUsers] = useState([]);
 
 
-  function dateFormatter(dateArray) {
-    const year = dateArray[0];
-    const month = dateArray[1];
-    const day = dateArray[2];
+  useEffect(() => {
+    getAllUsers();
+  }, []);
 
-    return year + " : " + month + " : " + day;
-}
-
-    const [user, setUser] = useState([])
-
-    useEffect(() => {
-      getAllUser()
-    }, [])
-
-    async function getAllUser() {
-        
-
-      listUsers().then((response) => {
-    alertify.success(response.status);
-    console.error(response.status);
-
-    alertify.success(" succesfull");
-    if(response.status === 200)
-    {
-        setUser(response.data);
+  async function getAllUsers() {
+    try {
+      const response = await listUsers();
+      if (response.status === 200) {
+        setUsers(response.data);
+      } else if (response.status === 204) {
+        alert.showAlert("لا يوجد بيانات", "success"); // Use alert
+      } else {
+        alert.showAlert("Failed to fetch users", "error");
+      }
+    } catch (error) {
+      alert.showAlert("An error occurred while fetching users", "error");
+      console.error(error);
     }
-        }).catch(error => {
-            alertify.success(error.message);
-            alertify.success(error.stack);
-  
-            console.error(error);
-        })
+  }
+
+  const handleEditUser = (id) => {
+    setUserId(id);
+    setIsFormOpen(true); // Open the form when edit is clicked
+  };
+
+  const handleCloseForm = () => {
+    setUserId(0);
+    setIsFormOpen(false); // Open the form when edit is clicked
+  };
+  const handleNewUser = () => {
+    setUserId(0);
+    setIsFormOpen(true); // Open the form when edit is clicked
+  };
+  const handleUpdateUser = async () => {
+    await getAllUsers(); //re-fetch users after update
+  };
+
+
+
+  const handleDeleteUser = async (id) => {
+    try {
+      await deleteUser(id); // Call your delete service/function
+      alert.showAlert("User deleted successfully!", "success");
+      getAllUsers(); // Refresh your data
+    } catch (error) {
+      alert.showAlert("Error deleting user!", "error");
+      console.error("Error deleting user:", error);
     }
+  };
+
+
   return (
     <React.Fragment>
-      <Title>المستخدمين </Title>
-      <Button
-          // disabled={open}
-          variant="outlined"
-          onClick={() => {
-            alert.showAlert("تمت العملية بنجاح", "warning"); //Show alert on success
-
-          }}
-        >
-          Re-open Alert
-        </Button>
+      <Title>المستخدمين</Title>
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell> ID</TableCell>
+            <TableCell>ID</TableCell>
             <TableCell>اسم المستخدم</TableCell>
             <TableCell>الاسم الكامل</TableCell>
             <TableCell>الحالة</TableCell>
             <TableCell>اضيف بواسطة</TableCell>
             <TableCell>تعديل</TableCell>
             <TableCell>حذف</TableCell>
-
-            
           </TableRow>
         </TableHead>
         <TableBody>
-          {user.map((item) => (
-            <TableRow
-              
-              key={item.id}
-            >
-              <TableCell>{item.id}</TableCell>
-             
-              <TableCell>{item.user_name}</TableCell>
-              <TableCell>{item.full_name}</TableCell>
-              <TableCell>{item.status}</TableCell>
-              <TableCell>{item.add_by}</TableCell>
-              <TableCell><Button className='btn btn-success' >تعديل</Button></TableCell>
-              <TableCell><Button className='btn btn-primary' >حذف</Button></TableCell>
+          {users.map((user) => (
+            <TableRow key={user.id}>
+              <TableCell>{user.id}</TableCell>
+              <TableCell>{user.user_name}</TableCell>
+              <TableCell>{user.full_name}</TableCell>
+              <TableCell>{user.status}</TableCell>
+              <TableCell>{user.add_by}</TableCell>
+              <TableCell>
+                <Button className="btn btn-success" onClick={() => handleEditUser(user.id)}>
+                  Edit
+                </Button>
+              </TableCell>
+              <TableCell>
+                <Button className="btn btn-primary" onClick={() => handleDeleteUser(user.id)}>
+                  Delete
+                </Button>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
 
-<Divider/>
- 
+      <Divider />
+
       <Grid item xs={12} container justifyContent="flex-end">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => setIsFormOpen(true)}
-                  sx={{ backgroundColor: "#2f9d58" }}
-                >
-                  اضافة مستخدم
-                </Button>
-                <AddAccount
-                  // onSaveAccount={handleSaveUser}
-                  open={isFormOpen}
-                  onClose={() => setIsFormOpen(false)}
-                />
-              </Grid>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => handleNewUser()}
+          sx={{ backgroundColor: "#2f9d58" }}
+        >
+          اضافة مستخدم
+        </Button>
+        {isFormOpen && ( // Conditionally render the form
+          <AddAccount
+            open={isFormOpen}
+            onClose={() => handleCloseForm()}
+            userId={userId}
+            onSaveAccount={handleUpdateUser}
+          />
+        )}
+      </Grid>
     </React.Fragment>
   );
 }
 
-export default withAlert(Accounts);
+export default withAlert(Users);
+
