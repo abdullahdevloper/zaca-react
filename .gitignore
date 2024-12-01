@@ -1,2 +1,4 @@
 node_modules
-node_modules
+git branch -M main
+git remote add origin https://github.com/abdullahdevloper/zaca-react.git
+git push -u origin main

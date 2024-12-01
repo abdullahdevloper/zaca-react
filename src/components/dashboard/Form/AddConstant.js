@@ -11,40 +11,28 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useEffect } from 'react'
 import { savedConstant, updateDataConstant, editConstant } from '../../service/ConstantsService'
 import Title from "../Title";
+import { withAlert } from '../withAlert'; 
 
-function ConstantForm({ onSaveConstant, open = true, onClose, actions }) {
+function ConstantForm({alert, onSaveConstant, open = true, onClose, constantId =0 }) {
   
 
   const [name_constants, setNameConstants] = useState('')
   const [code_constants, setCodeConstants] = useState('')
  
 
-
-  const navigate = useNavigate()
-  const { id } = useParams()
-
-
-  function pageTitle() {
-    if (id) {
-      return <h4 className='title'>تعديل</h4>
-    } else {
-      return <h4 className='title'>انشاء جديد</h4>
-    }
-  }
-
   useEffect(() => {
-    if (id) {
-      editConstant(id).then((response) => {
+
+    if (constantId!=0) {
+      editConstant(constantId).then((response) => {
         setNameConstants(response.data.name_constants);
         setCodeConstants(response.data.code_constants);
         
       })
     }
-  }, [id])
+  }, [constantId])
 
   function saveConstant(e) {
     e.preventDefault();
-    alertify.success(" start save.");
 
     const constant = { name_constants, code_constants }
 
@@ -52,20 +40,22 @@ function ConstantForm({ onSaveConstant, open = true, onClose, actions }) {
     if (name_constants === "" || code_constants === "") {
       return;
     }
-    if (id) {
-      updateDataConstant(id, constant).then((response) => {
-        // navigate('/')
+    if (constantId) {
+      updateDataConstant(constantId, constant).then((response) => {
+        alert.showAlert("تمت العملية بنجاح", "success"); //Show alert on success
       }).catch(error => {
         console.error(error);
       })
     } else {
       savedConstant(constant).then((response) => {
+        alert.showAlert("تمت العملية بنجاح", "success"); //Show alert on success
+
       }).catch(error => {
-        alertify.success(error.message);
+        alert.showAlert(error.message, "error"); //Show alert on success
+
 
         console.error(error);
       })
-      // navigate("/")
     }
   }
 
@@ -94,6 +84,7 @@ function ConstantForm({ onSaveConstant, open = true, onClose, actions }) {
           name="name_constants"
           label="اسم الثابت "
           type="text"
+          value={name_constants}
           placeholder='ادخل اسم الثابت'
           className='form-control'
           onChange={(e) => setNameConstants(e.target.value)}
@@ -113,6 +104,8 @@ function ConstantForm({ onSaveConstant, open = true, onClose, actions }) {
           label="كود الثابت"
           placeholder='ادخل كود الثابت'
           fullWidth
+          value={code_constants}
+
           onChange={(e) => setCodeConstants(e.target.value)}
           margin="normal"
           onClick={(event) => {
@@ -138,5 +131,5 @@ function ConstantForm({ onSaveConstant, open = true, onClose, actions }) {
     </Drawer>
   );
 }
+export default withAlert(connect(null)(ConstantForm));
 
-export default connect(null)(ConstantForm);

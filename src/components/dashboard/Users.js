@@ -13,13 +13,12 @@ import alertify from "alertifyjs";
 import Grid from "@mui/material/Grid";
 import AddAccount from "./Form/AddAccount.js";
 import Divider from "@mui/material/Divider";
-import axios from "axios";
-
+import { withAlert } from './withAlert'; 
 function preventDefault(event) {
   event.preventDefault();
 }
 
-function Accounts(props) {
+function Accounts({ alert }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
 
 
@@ -29,7 +28,7 @@ function Accounts(props) {
     const day = dateArray[2];
 
     return year + " : " + month + " : " + day;
-  }
+}
 
     const [user, setUser] = useState([])
 
@@ -59,6 +58,16 @@ function Accounts(props) {
   return (
     <React.Fragment>
       <Title>المستخدمين </Title>
+      <Button
+          // disabled={open}
+          variant="outlined"
+          onClick={() => {
+            alert.showAlert("تمت العملية بنجاح", "warning"); //Show alert on success
+
+          }}
+        >
+          Re-open Alert
+        </Button>
       <Table size="small">
         <TableHead>
           <TableRow>
@@ -113,5 +122,4 @@ function Accounts(props) {
   );
 }
 
-
-export default Accounts;
+export default withAlert(Accounts);

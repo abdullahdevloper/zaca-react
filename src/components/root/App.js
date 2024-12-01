@@ -3,6 +3,7 @@
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import Login from "../login/Login";
 import Constant from "../dashboard/Constants";
+import { AlertProvider } from '../dashboard/AlertContext'; // Correct path for AlertProvider
 
 import Dashboard from "../dashboard/Dashboard"
 import Users from "../dashboard/Users"
@@ -112,6 +113,7 @@ function App() {
       <BrowserRouter className="App" id="light">
 
         <ThemeProvider theme={defaultTheme} >
+        <AlertProvider> 
           <Box sx={{ display: "flex" }} dir="rtl">
             <CssBaseline />
             <Drawer variant="permanent" open={true}>
@@ -229,6 +231,8 @@ function App() {
               </Container>
             </Box>
           </Box>
+          </AlertProvider>
+
         </ThemeProvider>
       </BrowserRouter>
 
